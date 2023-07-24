@@ -1,14 +1,7 @@
-from ulab import numpy as np
-
-def I(n):
-    
-    identity = np.full((n,n),0.)
-    
-    for i in range(n):
-        
-        identity[i][i] = 1.
-        
-    return identity
+import numpy as np
+from numpy.linalg import inv
+from numpy import matmul
+from numpy import identity as I
 
 # KF + (OPTIONAL) LPF ----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -127,7 +120,7 @@ for counter in range(len(Data)-1):
     
     # UPDATE KALMAN GAIN MATRIX
     
-    K = np.dot(Pp,np.linalg.inv(Pp + R))
+    K = matmul(Pp,inv(Pp + R))
     
     # UPDATE MEASUREMENTS MATRIX
     
@@ -139,9 +132,9 @@ for counter in range(len(Data)-1):
     
     # UPDATE STATE & STATE UNCERTAINITY
     
-    X = Xp + np.dot(K,(Xm - Xp))
+    X = Xp + matmul(K,(Xm - Xp))
     
-    P = np.dot((I(len(K)) - K),Pp)
+    P = matmul((I(len(K)) - K),Pp)
     
     # UPDATE DERIVED VALUES FROM BAROMETER
     
@@ -157,15 +150,15 @@ for counter in range(len(Data)-1):
     
     # FUSE Xd1 & Xd2
     
-    Xf = np.dot(G1,Xd1) + np.dot((I(len(G1)) - G1),Xd2)
+    Xf = matmul(G1,Xd1) + matmul((I(len(G1)) - G1),Xd2)
     
     # APPLY LPF ON Xf
 
-    Xl = np.dot(G2,Xf) + np.dot((I(len(G2)) - G2),Xl)
+    Xl = matmul(G2,Xf) + matmul((I(len(G2)) - G2),Xl)
     
     # FILTERED vs RAW ALTITUDE - print(Xl[0][0],altitude(Data[counter][9],Data[counter][8]))
 
-    # FILTERED vs RAW VELOCITY - print(Xl[1][0],(altitude(Data[counter][9],Data[counter][8]) - altitude(Data[counter-1][9],Data[counter-1][8]))/dt)
+    print(Xl[1][0],(altitude(Data[counter][9],Data[counter][8]) - altitude(Data[counter-1][9],Data[counter-1][8]))/dt)
 
     # FILTERED vs RAW ACCELERATION - print(Xl[2][0],-float(Data[counter][2])-g)
     
@@ -180,4 +173,3 @@ for counter in range(len(Data)-1):
     dt = (Data[counter][0] - Data[counter - 1][0])/1000
     
     # REPEAT TILL EOF
-

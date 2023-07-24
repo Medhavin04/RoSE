@@ -1,7 +1,14 @@
-import numpy as np
-from numpy.linalg import inv
-from numpy import matmul
-from numpy import identity as I
+from ulab import numpy as np
+
+def I(n):
+    
+    identity = np.full((n,n),0.)
+    
+    for i in range(n):
+        
+        identity[i][i] = 1.
+        
+    return identity
 
 # KF + (OPTIONAL) LPF ----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -120,21 +127,19 @@ for counter in range(len(Data)-1):
     
     # UPDATE KALMAN GAIN MATRIX
     
-    K = matmul(Pp,inv(Pp + R))
+    K = np.dot(Pp,np.linalg.inv(Pp + R))
     
     # UPDATE MEASUREMENTS MATRIX
     
     Xm[0][0] = Data[counter][9]
     Xm[1][0] = Data[counter][8]
     Xm[2][0] = -Data[counter][2] - g
-    Xm[3][0] = Data[counter][3]
-    Xm[4][0] = Data[counter][4]
     
     # UPDATE STATE & STATE UNCERTAINITY
     
-    X = Xp + matmul(K,(Xm - Xp))
+    X = Xp + np.dot(K,(Xm - Xp))
     
-    P = matmul((I(len(K)) - K),Pp)
+    P = np.dot((I(len(K)) - K),Pp)
     
     # UPDATE DERIVED VALUES FROM BAROMETER
     
@@ -150,11 +155,11 @@ for counter in range(len(Data)-1):
     
     # FUSE Xd1 & Xd2
     
-    Xf = matmul(G1,Xd1) + matmul((I(len(G1)) - G1),Xd2)
+    Xf = np.dot(G1,Xd1) + np.dot((I(len(G1)) - G1),Xd2)
     
     # APPLY LPF ON Xf
 
-    Xl = matmul(G2,Xf) + matmul((I(len(G2)) - G2),Xl)
+    Xl = np.dot(G2,Xf) + np.dot((I(len(G2)) - G2),Xl)
     
     # FILTERED vs RAW ALTITUDE - print(Xl[0][0],altitude(Data[counter][9],Data[counter][8]))
 
@@ -173,3 +178,4 @@ for counter in range(len(Data)-1):
     dt = (Data[counter][0] - Data[counter - 1][0])/1000
     
     # REPEAT TILL EOF
+
